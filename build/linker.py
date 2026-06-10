@@ -837,6 +837,16 @@ def _build_dll(desc_entry_count: int) -> bytes:
 
 def link(cfg: LinkerConfig) -> None:
     """Build cfg.output_path from cfg.obj_path."""
+    out_stem = Path(cfg.output_path).stem
+    if len(out_stem) > 8:
+        raise SystemExit(
+            f"output filename '{out_stem}.ZDL' has a {len(out_stem)}-char basename — "
+            "Zoom truncates ZDL basenames to 8 chars, which can freeze the pedal on load. "
+            "Set output_basename in manifest.json to a name of 8 characters or fewer."
+        )
+    if cfg.fxid <= 384:
+        print(f"  WARNING: fxid {cfg.fxid} is in the stock-effect range (0–384); "
+              "see docs/FXID-REGISTRY.md for the community range (400–999).")
     print(f"=== {cfg.effect_name} ZDL Linker ===")
 
     # ----- Parse .obj -----

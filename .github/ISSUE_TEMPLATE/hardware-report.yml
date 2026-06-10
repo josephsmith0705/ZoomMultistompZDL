@@ -1,0 +1,93 @@
+name: Hardware Test Report
+description: Report whether a ZDL loaded, ran audio, and behaved correctly on real hardware.
+labels: ["hardware-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Hardware reports are the most valuable contribution to this project.
+        Please fill in as many fields as you can. Unknown fields are fine — leave them blank.
+
+  - type: dropdown
+    id: pedal_model
+    attributes:
+      label: Pedal model
+      options:
+        - Zoom MS-70CDR
+        - Zoom MS-50G
+        - Zoom MS-60B
+        - Zoom A1 Four / A1X Four
+        - Zoom B1 Four / B1X Four
+        - Zoom G1 Four / G1X Four
+        - Other (describe in Additional notes)
+    validations:
+      required: true
+
+  - type: input
+    id: firmware_version
+    attributes:
+      label: Firmware version
+      description: "Found in Zoom Effect Manager under device info, or printed on boot. Example: 2.10"
+      placeholder: "e.g. 2.10"
+    validations:
+      required: true
+
+  - type: input
+    id: zdl_name
+    attributes:
+      label: ZDL file name and SHA-256
+      description: "File name from dist/ and its sha256 checksum. Run: sha256sum TEcho4.ZDL"
+      placeholder: "TEcho4.ZDL  a1b2c3d4..."
+    validations:
+      required: true
+
+  - type: input
+    id: effect_manager_version
+    attributes:
+      label: Zoom Effect Manager version
+      placeholder: "e.g. 2.3.3"
+
+  - type: checkboxes
+    id: test_results
+    attributes:
+      label: Test results
+      description: Check everything that passed.
+      options:
+        - label: Effect loaded without freeze or crash
+        - label: Effect appears in the on-device FX browser
+        - label: Audio passes through
+        - label: Knobs on page 1 update the sound
+        - label: Knobs on page 2+ (if present) update the sound
+        - label: Parameter values survive preset switching
+        - label: Effect bypasses and re-engages correctly
+        - label: Pedal fully recovered after a crash (power-cycle)
+
+  - type: dropdown
+    id: overall_result
+    attributes:
+      label: Overall result
+      options:
+        - "Pass — loads and runs as expected"
+        - "Partial — loads but something is wrong (describe below)"
+        - "Freeze on load — required power-cycle"
+        - "No audio — loaded but silent"
+        - "Did not appear in FX browser"
+        - "Other (describe below)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps and observations
+      description: What did you do, and what happened? Include any unexpected behavior.
+      placeholder: |
+        1. Installed TEcho4.ZDL via Zoom Effect Manager 2.3.3
+        2. Loaded the effect on the pedal
+        3. ...
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes
+      description: Hardware variant details, firmware quirks, or anything else relevant.

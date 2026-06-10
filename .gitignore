@@ -19,9 +19,19 @@ src/hardware_probes/*/*.obj
 src/hardware_probes/*/*_params.h
 *.wav
 tools/measure/out/
+ghidra_12.1_PUBLIC/
 build/probes/
 *.id0
 *.id1
 *.id2
 *.nam
 *.til
+
+# Redistributed Zoom/TI copyrighted material — not distributed in this repo.
+# See docs/OBTAINING-REFERENCE-FILES.md for how to obtain them locally.
+stock_zdls/
+firmware/
+docs/*.pdf
+
+# Temporary planning file
+SDK_PLAN.md

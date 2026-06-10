@@ -1,0 +1,32 @@
+{
+  "effect_name": "SyncCalc",
+  "comment": "v1 §4 algorithm validator. The audio function calls the firmware's state[24] (at c00d4b40, the float-math utility) directly from audio context, with controlled float inputs picked by the Sync knob. The 16 knob positions feed A4 = float(idx+1) (1.0..16.0) and B4 = float(100.0) into state[24]. The return value's byte-sum drives the audible gain.\n\nTwo separate questions the user can answer by listening:\n  (1) Does state[24] return DIFFERENT values for DIFFERENT inputs?\n      Sweep Sync 0..15 at a fixed BPM — the gain should change per position.\n      A constant gain across all positions means state[24] is either trivial or our call interface is wrong.\n  (2) Does state[24] internally consult tempo state?\n      Pick a Sync position that gives mid-range gain. Tap tempo from 75 to 250 BPM.\n      If gain changes with tap tempo → state[24] is BPM-aware (§4 is right).\n      If gain stays constant → state[24] is pure float math (§4 is wrong about tempo folding here).\n\nNo handler patches: LineSel handler is intact. The whole experiment runs in C from the audio function via a hardcoded function-pointer call to c00d4b40.",
+
+  "audio_func_name": "Fx_FLT_SyncCalc",
+
+  "gid": 2,
+  "gid_comment": "0x02 = Filter category.",
+
+  "fxid": 416,
+  "fxid_comment": "0x01A0. Next after BpmHunt (0x019F).",
+
+  "fxid_version": "1.00",
+  "flags_byte": 1,
+
+  "params": [
+    {
+      "name": "Sync",
+      "type": "knob",
+      "max": 15,
+      "default": 0,
+      "flags": 40,
+      "flags_comment": "0x28 — Pattern B tempo-sync bit. Carries the TAP UI button on left-knob click so the user can change tap tempo while the audio function calls state[24].",
+      "audio_min": 0.0,
+      "audio_max": 1.0,
+      "audio_default": 0.0,
+      "comment": "Knob position 0..15 picks A4 = float(idx+1) (1.0..16.0) for the call to state[24]. B4 is always float(100.0). The return value's byte-sum is mapped to audio gain."
+    }
+  ],
+
+  "audio_nop": false
+}

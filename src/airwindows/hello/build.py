@@ -7,6 +7,7 @@ Now using the linker to test the 3-param rendering bug with a minimal DSP.
 from __future__ import annotations
 import json
 import subprocess
+import os
 import sys
 from pathlib import Path
 
@@ -16,7 +17,9 @@ sys.path.insert(0, str(ROOT / "build"))
 
 from linker import LinkerConfig, link, params_from_manifest  # noqa: E402
 
-TI_ROOT = Path("/Applications/ti/ccs2050/ccs/tools/compiler/ti-cgt-c6000_8.5.0.LTS")
+TI_ROOT = Path(os.environ.get(
+    "TI_CGT_ROOT",
+    "/Applications/ti/ccs2050/ccs/tools/compiler/ti-cgt-c6000_8.5.0.LTS"))
 CL6X    = TI_ROOT / "bin" / "cl6x"
 
 CFLAGS = [

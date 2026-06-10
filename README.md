@@ -174,7 +174,7 @@ The core pieces are:
 | [src/custom/](src/custom/) | Original non-Airwindows effects built with the same linker/safety rules. |
 | [src/hardware_probes/](src/hardware_probes/) | Diagnostic ZDLs used to map the pedal runtime ABI. |
 | [dist/](dist/) | Release `.ZDL` files for users; never probes. |
-| [stock_zdls/](stock_zdls/) | Tracked 830-file stock ZDL corpus used for comparison. |
+| `stock_zdls/` | 830-file stock ZDL corpus used for comparison (not tracked — see [docs/OBTAINING-REFERENCE-FILES.md](docs/OBTAINING-REFERENCE-FILES.md)). |
 
 The important recent finding is that custom effects can use the host-managed
 large state descriptor at `ctx[3]`. That made the stateful `StereoChorus` port
@@ -214,7 +214,7 @@ ZoomMultistompZDL/
 ├── src/hardware_probes/       diagnostic ZDLs for runtime ABI experiments
 ├── src/airwindows/        effect sources, manifests, and build scripts
 ├── src/custom/            original non-Airwindows effects
-├── stock_zdls/            tracked 830-file stock ZDL corpus used for comparison
+├── stock_zdls/            stock ZDL corpus (not tracked; see docs/OBTAINING-REFERENCE-FILES.md)
 └── build_all.py           release/probe build entrypoint
 ```
 

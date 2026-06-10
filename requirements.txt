@@ -1,0 +1,4 @@
+# Required only by tools/audio_preview and tools/measure — not needed to build ZDLs.
+numpy
+scipy
+soundfile
