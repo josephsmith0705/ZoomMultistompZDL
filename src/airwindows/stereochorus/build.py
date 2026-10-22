@@ -72,6 +72,7 @@ def main() -> None:
             p.unlink()
 
     cfg = LinkerConfig(
+        materialize_init=True,
         effect_name=effect_name,
         audio_func_name=audio_func_name,
         gid=manifest["gid"],

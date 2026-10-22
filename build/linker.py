@@ -319,6 +319,10 @@ class LinkerConfig:
     synthesize_linesel_edit_handlers: bool = False
     synth_edit_start_index: int = 2
 
+    # Release effects must materialize saved controls before the first audio
+    # block. Leave opt-in so hardware probes retain their original init path.
+    materialize_init: bool = False
+
     def __post_init__(self) -> None:
         if self.audio_func_name is None:
             self.audio_func_name = f"Fx_FLT_{self.effect_name}"
@@ -772,6 +776,41 @@ _NOP_RETURN = bytes([
 
 
 # ---------------------------------------------------------------------------
+# Parameter initialization, restored from the working pre-migration linker.
+# TI-assembled v4 frame: preserve the callee-saved registers, reload ctx for
+# each handler, and skip calls if the firmware ctx[31] callback is not ready.
+# Every chunk is fetch-packet aligned. Use PC-relative calls AND return setup:
+# absolute handler addresses without loader relocations freeze a rebased ZDL.
+_INIT_MAT_PROLOGUE = bytes.fromhex(
+    "f6543c07c4353c07c6353c06c4353c06c6353c05c4353c05c6353c01f4543c02"
+    "0080000000000000000000000000000000000000000000000000000000000000")
+_INIT_MAT_CALL_BLOCK = bytes.fromhex(
+    "e4423c0200000000000000000020000064e29300006000001208009000800000"
+    "12fcff0f62018801006000000000000000000000000000000000000000000000")
+_INIT_MAT_EPILOGUE = bytes.fromhex(
+    "e4523c02e6333c01e4333c05e6333c05e4333c06e6333c06e4333c07e6523c07"
+    "0060000062030c00008000000000000000000000000000000000000000000000")
+_INIT_MAT_BRANCH_OFF = 0x20
+_INIT_MAT_STRIDE = len(_INIT_MAT_CALL_BLOCK)
+
+
+def _init_materialize_body(handler_vas: list[int], init_va: int) -> bytes:
+    """Emit guarded edit-handler calls that survive text-segment rebasing."""
+    if init_va % 32:
+        raise ValueError("materializing init must be fetch-packet aligned")
+    out = bytearray(_INIT_MAT_PROLOGUE)
+    for va in handler_vas:
+        block = bytearray(_INIT_MAT_CALL_BLOCK)
+        branch_va = init_va + len(out) + _INIT_MAT_BRANCH_OFF
+        if va % 4 or branch_va % 32:
+            raise ValueError("unaligned materializing init branch/handler")
+        _patch_pcr_s21(block, _INIT_MAT_BRANCH_OFF, va, branch_va)
+        out += block
+    out += _INIT_MAT_EPILOGUE
+    return bytes(out)
+
+
+# ---------------------------------------------------------------------------
 # Dll_<Name> entry function  [v1-empirical]
 #
 # 200-byte copy of NoiseGate's Dll function with 4 reloc points repatched
@@ -987,13 +1026,20 @@ def link(cfg: LinkerConfig) -> None:
     nop_onf_needed    = 1 if (not use_real_handlers or "onf" not in cfg.handler_funcs) else 0
     object_init_name  = f"{cfg.audio_func_name}_init"
     use_object_init   = cfg.use_object_init_handler and object_init_name in object_symbol_names
+    if cfg.materialize_init and use_object_init:
+        raise ValueError("choose either materialize_init or an object init handler")
     NOP_RETURN_COUNT  = (0 if use_object_init else 1) + nop_knob_count + nop_onf_needed
     if NOP_RETURN_COUNT == 0:
         NOP_RETURN_COUNT = 1
     NOP_RET_OFF       = _align_up(DIVF_OFF + DIVF_SIZE, 32)
     NOP_RET_STUB_SIZE = 32
     NOP_RET_SIZE      = NOP_RET_STUB_SIZE * NOP_RETURN_COUNT
-    DLL_OFF           = NOP_RET_OFF + NOP_RET_SIZE
+    INIT_MAT_OFF     = NOP_RET_OFF + NOP_RET_SIZE
+    INIT_MAT_SIZE    = (len(_INIT_MAT_PROLOGUE)
+                        + _INIT_MAT_STRIDE * len(cfg.params)
+                        + len(_INIT_MAT_EPILOGUE)
+                        if cfg.materialize_init else 0)
+    DLL_OFF           = INIT_MAT_OFF + INIT_MAT_SIZE
     DLL_SIZE          = 200
     TEXT_TOTAL        = _align_up(DLL_OFF + DLL_SIZE, 32)
 
@@ -1008,6 +1054,8 @@ def link(cfg: LinkerConfig) -> None:
         print(f"    knob3    @ 0x{KNOB3_OFF:04X}  ({KNOB3_SIZE})")
     print(f"    divf     @ 0x{DIVF_OFF:04X}  ({DIVF_SIZE})")
     print(f"    nop_ret  @ 0x{NOP_RET_OFF:04X}  ({NOP_RETURN_COUNT} × 32-byte stubs)")
+    if INIT_MAT_SIZE:
+        print(f"    init_mat @ 0x{INIT_MAT_OFF:04X}  ({INIT_MAT_SIZE})")
     print(f"    Dll      @ 0x{DLL_OFF:04X}")
     print(f"    total      0x{TEXT_TOTAL:X}")
 
@@ -1121,6 +1169,18 @@ def link(cfg: LinkerConfig) -> None:
     if n_nop_handlers:
         print(f"  WARNING: {n_nop_handlers} knob(s) using NOP_RETURN edit "
               f"handler (each gets a unique stub VA)")
+
+    if cfg.materialize_init:
+        nop_lo = TEXT_VA + NOP_RET_OFF
+        nop_hi = nop_lo + NOP_RET_SIZE
+        call_vas = [va for va in knob_edit_vas if not (nop_lo <= va < nop_hi)]
+        init_va = TEXT_VA + INIT_MAT_OFF
+        body = _init_materialize_body(call_vas, init_va)
+        if len(body) > INIT_MAT_SIZE:
+            raise RuntimeError("materializing init exceeds its reserved text region")
+        out_text[INIT_MAT_OFF:INIT_MAT_OFF + len(body)] = body
+        print(f"  init:    materializing {len(call_vas)} param(s) at load "
+              f"(_init @ 0x{init_va:08X}, {len(body)}B)")
 
     desc_bytes, desc_relocs = _build_descriptor(
         effect_name=cfg.effect_name,
@@ -1299,8 +1359,8 @@ def link(cfg: LinkerConfig) -> None:
                     f"--mem_model:data=far."
                 )
             if rel['sym_idx'] not in sym_addr:
-                print(f"  SKIP unresolved sym {sym['name']!r} at {sec['name']}+0x{offset:X}")
-                continue
+                raise RuntimeError(
+                    f"unresolved symbol {sym['name']!r} in {sec['name']}+0x{offset:X}")
             # cl6x's intra-section CALLP placeholders encode a displacement
             # measured from the SECTION START, not from the instruction. We
             # compensate by adding the instruction's section offset (stored

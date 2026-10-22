@@ -9,6 +9,7 @@ Current custom effects:
 | Effect | Notes |
 |---|---|
 | [ott/](ott/) | OTT-style 3-band upward/downward compressor with `DryWet`, `Time`, `Output`, and `SplitFrq`. Not an Ableton port. |
+| [pll/](pll/) | Digital phase/frequency detector, PI loop filter, and multiplied VCO with an input-edge divider voice. |
 
 Before adding a new custom effect, read
 [../../docs/SAFE-DSP-RULES.md](../../docs/SAFE-DSP-RULES.md). Keep the first

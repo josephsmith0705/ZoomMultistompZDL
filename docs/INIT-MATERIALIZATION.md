@@ -1,6 +1,27 @@
 # Parameter Materialization on Load
 
-Last updated: 2026-05-19
+## Current release implementation (2026-10-22)
+
+The migrated linker now includes the guarded, PC-relative v4 parameter init
+from the previous working build system. All ten release builders explicitly
+set `materialize_init=True`; diagnostic probes retain their original init.
+PLL requires this because zeroed Level/HiLvl/LoLvl slots silence its output.
+Do not substitute default values for valid saved zero values.
+
+The init saves/restores the callee-saved register set, reloads context before
+each handler call, and skips calls if `ctx[31]` is null. Prologue, per-handler
+call blocks, and epilogue are each 64 bytes. Both call target and return setup
+are PC-relative so they survive loader text rebasing. Space is reserved before
+placing `Dll` to prevent overwriting its entry point.
+
+Run `python3 -B -m unittest tests.test_init_materialize tests.test_pll_audio -v`
+from the project root after rebuilding. This verifies release options, linked
+descriptor/init/handler targets, rebase behavior, and portable PLL DSP output;
+it does not replace a pedal listening test. See [../AGENTS.md](../AGENTS.md).
+
+---
+
+## Historical investigation (2026-05-19)
 
 This file documents the stock `_init` recipe that materializes parameter
 values at load time. The recipe is reconstructed by reading

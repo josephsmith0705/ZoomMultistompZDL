@@ -57,6 +57,7 @@ def main() -> None:
             p.unlink()
 
     cfg = LinkerConfig(
+        materialize_init=True,
         effect_name = manifest["effect_name"],
         gid         = manifest["gid"],
         fxid        = manifest["fxid"],

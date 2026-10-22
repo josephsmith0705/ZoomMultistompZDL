@@ -23,6 +23,14 @@ Render TapeEcho4 using manifest defaults:
 python3 tools/audio_preview/preview.py render tapeecho4 input.wav preview.wav
 ```
 
+Render PLL using manifest defaults or pedal-style parameter overrides:
+
+```bash
+python3 tools/audio_preview/preview.py render pll input.wav pll.wav
+python3 tools/audio_preview/preview.py render pll input.wav pll-fast.wav \
+  --set speed=500 --set mult=3 --set div=1
+```
+
 Override pedal-style parameter values:
 
 ```bash
