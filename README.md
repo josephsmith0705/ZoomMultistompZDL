@@ -90,6 +90,9 @@ effect directory conventions are summarized in
   an Ableton port. It exposes `DryWet`, `Time`, `Output`, and `SplitFrq`, and
   builds cleanly with small `ctx[3]` state, no `.fardata`, no `.text`, and no
   object relocations. Hardware result is pending.
+- `PLL.ZDL` is an original digital PLL effect with multiplied and
+  input-edge-divided square-wave voices. It is included in release builds;
+  pedal lock range and CPU behavior still need hardware validation.
 - On MS-70CDR, Drive-category custom effects may not appear in the on-device FX
   browser unless at least one stock Drive effect is also installed. `ToTape9`
   is intentionally categorized as Drive, so install a stock Drive effect too if
@@ -148,6 +151,7 @@ Build one effect:
 python3 -B build_all.py stereochorus
 python3 -B build_all.py tapeecho4
 python3 -B build_all.py ott
+python3 -B build_all.py pll
 python3 -B build_all.py totape9
 python3 -B build_all.py verbtiny
 ```

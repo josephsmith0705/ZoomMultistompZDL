@@ -19,38 +19,9 @@ def groups(labels, classify, maximum=100):
     return result
 
 SELECTORS={
- 'PitchEnv':{
-     'Pitch':[{'label':str(n) if n<=0 else '+'+str(n),
-               'from':n+36,'to':n+36,'value':n+36} for n in range(-36,37)],
-     'Direction':groups(['fwd','bkwd'],lambda r:r,1),
- },
- 'TerraPLL':{
+ 'PLL':{
      'Mult':groups(['1x','2x','3x','4x','5x','6x','7x','8x'],lambda r:r,7),
      'Div':groups(['1/1','1/2','1/3','1/4','1/5','1/6','1/7','1/8'],lambda r:r,7),
- },
- 'PolySyn':{
-     'Gate':groups(['Off','On'],lambda r:r,1),
-     'HByp':groups(['Off','On'],lambda r:r,1),
- },
- 'Arpoid':{
-     'Direction':groups(['Down','Up','Both'],lambda r:r,2),
-     'Range':[{'label':'1','from':0,'to':1,'value':1}]+[
-             {'label':str(n),'from':n,'to':n,'value':n} for n in range(2,25)],
- },
- 'Tonic':{
-   'Mode':groups(['Decim','Crush','FM','Ring'],lambda r:ladder(r,[.25,.5,.75])),
-   'Order':groups(['Fwd','Rev'],lambda r:ladder(r,[.5])),
- },
- 'Rooms6':{'Mode':groups(['Room','Digit','Peak','Gate','Wave','Gong'],lambda r:r,5)},
- 'Rooms':{'Mode':groups(['Room','Digit','Peak','Gate','Wave','Gong'],lambda r:min(5,int(f32(normalized(r)*f32(5.999)))))},
- 'Spool':{'Div':groups(['1/16','1/8T','1/8','1/8.','1/4','1/4.'],lambda r:ladder(r,[.16666667,.33333334,.5,.6666667,.8333333]))},
- 'Hydra':{'Div':groups(['Grain','1/32','1/16T','1/16','1/8T','1/8','1/8.','1/4'],lambda r:ladder(r,[.0625,.1875,.3125,.4375,.5625,.6875,.8125]))},
- 'Spiral':{'Div':groups(['1/32','1/16T','1/16','1/8T','1/8','1/8.','1/4','1/4.'],lambda r:ladder(r,[.125,.25,.375,.5,.625,.75,.875]))},
- 'Rewire':{'Route':groups(['BDRCS','SCRDB','DSBCR','RCSBD','SBRDC'],lambda r:ladder(r,[.2,.4,.6,.8]))},
- 'Stasis':{'Capture':groups(['Stomp','Release','Hold'],lambda r:r,2)},
- 'RndmFLTR':{
-   'Type':groups(['HPF','BPF','LPF'],lambda r:r,2),
-   'Chara':groups(['2Pole','4Pole'],lambda r:r,1),
  },
 }
 def attach_selectors(effect):

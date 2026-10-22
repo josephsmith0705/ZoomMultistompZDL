@@ -4,16 +4,16 @@
   "audio_func_name": "Fx_SFX_PLL",
   "gid": 7,
   "fxid": 486,
-  "fxid_version": "3.41",
+  "fxid_version": "1",
   "flags_byte": 1,
   "params": [
-    {"name": "Speed", "max": 1000, "default": 100, "comment": "Loop natural frequency: 0.5 + 7.5 * (Speed/100)^2 Hz. Speed 100 is 8 Hz; Speed 1000 is 750.5 Hz."},
-    {"name": "Damping", "max": 100, "default": 32, "comment": "Damping ratio zeta: 0.1 + 1.8972087 * knob. Default 32 preserves the previous zeta=0.707."},
-    {"name": "Level", "max": 100, "default": 80, "comment": "Shared level for multiplied and divided PLL voices; 0 to unity."},
+    {"name": "Speed", "max": 1000, "default": 900, "comment": "Loop natural frequency: 0.5 + 7.5 * (Speed/100)^2 Hz. Speed 100 is 8 Hz; Speed 1000 is 750.5 Hz."},
+    {"name": "Damp", "max": 100, "default": 75, "comment": "Damping ratio zeta: 0.1 + 1.8972087 * knob. Default 32 preserves the previous zeta=0.707."},
+    {"name": "Level", "max": 100, "default": 50, "comment": "Shared level for multiplied and divided PLL voices; 0 to unity."},
     {"name": "Mult", "max": 7, "default": 0, "audio_default": 0.0, "comment": "Eight fixed choices: 1x..8x; raw values 0..7 select each multiplier."},
     {"name": "Div", "max": 7, "default": 0, "audio_default": 0.0, "comment": "Eight fixed choices: 1/1..1/8; raw values 0..7 select each divider."},
-    {"name": "HiLvl", "max": 100, "default": 100, "comment": "Output level of the multiplied high voice; 0..100%."},
-    {"name": "LoLvl", "max": 100, "default": 100, "comment": "Output level of the input-edge-divided low voice; 0..100%."}
+    {"name": "HiLvl", "max": 100, "default": 50, "comment": "Output level of the multiplied high voice; 0..100%."},
+    {"name": "LoLvl", "max": 100, "default": 50, "comment": "Output level of the input-edge-divided low voice; 0..100%."}
   ],
   "audio_nop": false
 }

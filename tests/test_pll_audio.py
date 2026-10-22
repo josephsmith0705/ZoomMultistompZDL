@@ -28,7 +28,7 @@ class PLLAudio(unittest.TestCase):
 int main(void) {
     PLLState s;
     tp_init(&s, tp_center_hz(0.0f));
-    float speed = SPEED, damping = DAMPING;
+    float speed = SPEED, damping = DAMP;
     float omega = TP_TWO_PI * tp_bandwidth_hz(speed);
     float kp = 2.0f * tp_damping_ratio(damping) * omega;
     float ki = omega * omega;
@@ -51,7 +51,7 @@ int main(void) {
     return 0;
 }
 '''
-        for key in ("Speed", "Damping", "Level", "HiLvl", "LoLvl"):
+        for key in ("Speed", "Damp", "Level", "HiLvl", "LoLvl"):
             code = code.replace(key.upper(), f"{controls[key]:.9f}f")
         with tempfile.TemporaryDirectory(prefix="pll-audio-test-") as folder:
             source = Path(folder) / "pll_audio.c"

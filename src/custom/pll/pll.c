@@ -44,7 +44,7 @@ void PLL_AUDIO_FUNC(unsigned int *ctx)
     }
 
     float speed = zoom_param_norm01(params[PLL_SPEED_SLOT], PLL_SPEED_DEFAULT_NORM);
-    float damping = zoom_param_norm01(params[PLL_DAMPING_SLOT], PLL_DAMPING_DEFAULT_NORM);
+    float damping = zoom_param_norm01(params[PLL_DAMP_SLOT], PLL_DAMP_DEFAULT_NORM);
     /* Removed P/I/V gain knobs are fixed at UI 50, i.e. unity trims. */
     float pGain = 0.5f;
     float iGain = 0.5f;
